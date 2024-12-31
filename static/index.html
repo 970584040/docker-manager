@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Docker 容器监控</title>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .container-header { 
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .detail { 
+            margin: 5px 0 5px 20px; 
+            color: #666;
+            line-height: 1.4;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .status.running {
+            background-color: #27ae60;
+            color: white;
+        }
+        .status.exited {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .status.created {
+            background-color: #f1c40f;
+            color: black;
+        }
+        .status.paused {
+            background-color: #3498db;
+            color: white;
+        }
+        .status.unknown {
+            background-color: #95a5a6;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Docker 容器监控</h1>
+    <div id="containers"></div>
+
+    <script>
+        async function loadContainers() {
+            try {
+                const response = await fetch('/api/containers');
+                const containers = await response.json();
+                
+                const containersDiv = document.getElementById('containers');
+                containersDiv.innerHTML = '';
+                
+                containers.forEach(container => {
+                    const div = document.createElement('div');
+                    div.className = 'container';
+                    const statusClass = container.status.toLowerCase();
+                    div.innerHTML = `
+                        <div class="container-header">
+                            ${container.name}
+                            <span class="status ${statusClass}">${container.status}</span>
+                        </div>
+                        <div class="detail">ID: ${container.id}</div>
+                        <div class="detail">镜像: ${container.image}</div>
+                        <div class="detail">端口映射:</div>
+                        <div class="detail">
+                            ${container.ports.length ? container.ports.map(p => `- ${p}`).join('<br>') : '无'}
+                        </div>
+                        <div class="detail">挂载点:</div>
+                        <div class="detail">
+                            ${container.mounts.length ? container.mounts.map(m => `- ${m}`).join('<br>') : '无'}
+                        </div>
+                    `;
+                    containersDiv.appendChild(div);
+                });
+            } catch (error) {
+                console.error('加载容器信息失败:', error);
+            }
+        }
+
+        // 页面加载完成后立即加载数据
+        loadContainers();
+        // 每2秒刷新一次
+        setInterval(loadContainers, 2000);
+    </script>
+</body>
+</html> 

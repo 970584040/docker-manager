@@ -1,4 +1,5 @@
 use bollard::Docker;
+use bollard::API_DEFAULT_VERSION;
 use bollard::models::EventMessageTypeEnum;
 use bollard::system::EventsOptions;
 use bollard::container::ListContainersOptions;
@@ -9,6 +10,8 @@ use std::time::{Duration, SystemTime};
 use crate::restart::{ContainerConfig, ContainerRestarter};
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::path::Path;
+use std::process::Command;
 
 pub struct ContainerMonitor {
     docker: Docker,
@@ -16,12 +19,46 @@ pub struct ContainerMonitor {
 }
 
 impl ContainerMonitor {
+    fn get_docker_socket_path() -> String {
+        // 首先检查默认路径
+        if Path::new("/var/run/docker.sock").exists() {
+            return "/var/run/docker.sock".to_string();
+        }
+
+        // 如果默认路径不存在，尝试获取 Docker context 中的路径
+        let output = Command::new("docker")
+            .args(["context", "inspect"])
+            .output()
+            .ok();
+
+        if let Some(output) = output {
+            if output.status.success() {
+                if let Ok(stdout) = String::from_utf8(output.stdout) {
+                    // 解析输出找到 socket 路径
+                    if stdout.contains("\"Host\":") {
+                        if let Some(socket_path) = stdout
+                            .lines()
+                            .find(|line| line.contains("\"Host\":"))
+                            .and_then(|line| line.split("unix://").nth(1))
+                            .map(|path| path.trim_matches(|c| c == '"' || c == ',' || c == ' '))
+                        {
+                            return socket_path.to_string();
+                        }
+                    }
+                }
+            }
+        }
+
+        // 如果都失败了，返回默认路径
+        "/var/run/docker.sock".to_string()
+    }
+
     pub async fn new() -> Result<Self> {
-        let docker = Docker::connect_with_local_defaults()?;
+        let socket_path = Self::get_docker_socket_path();
+        let docker = Docker::connect_with_socket(&socket_path, 120, API_DEFAULT_VERSION)?;
         let restarter = Arc::new(ContainerRestarter::new().await?);
         let monitor = Self { docker, restarter };
         
-        // 初始化：获取所有现有容器的配置
         monitor.init_containers().await?;
         
         Ok(monitor)

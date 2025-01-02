@@ -20,15 +20,14 @@ pub struct ContainerConfig {
 
 pub struct ContainerRestarter {
     docker: Docker,
-    pub container_configs: Arc<Mutex<HashMap<String, ContainerConfig>>>,
+    pub container_configs: Mutex<HashMap<String, ContainerConfig>>,
 }
 
 impl ContainerRestarter {
-    pub async fn new() -> Result<Self> {
-        let docker = Docker::connect_with_local_defaults()?;
+    pub async fn new(docker: Docker) -> Result<Self> {
         Ok(Self {
             docker,
-            container_configs: Arc::new(Mutex::new(HashMap::new())),
+            container_configs: Mutex::new(HashMap::new())
         })
     }
 

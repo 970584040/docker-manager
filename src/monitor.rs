@@ -12,6 +12,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::path::Path;
 use std::process::Command;
+use crate::docker::DockerClient;
 
 pub struct ContainerMonitor {
     docker: Docker,
@@ -19,45 +20,10 @@ pub struct ContainerMonitor {
 }
 
 impl ContainerMonitor {
-    fn get_docker_socket_path() -> String {
-        // 首先检查默认路径
-        if Path::new("/var/run/docker.sock").exists() {
-            return "/var/run/docker.sock".to_string();
-        }
-
-        // 如果默认路径不存在，尝试获取 Docker context 中的路径
-        let output = Command::new("docker")
-            .args(["context", "inspect"])
-            .output()
-            .ok();
-
-        if let Some(output) = output {
-            if output.status.success() {
-                if let Ok(stdout) = String::from_utf8(output.stdout) {
-                    // 解析输出找到 socket 路径
-                    if stdout.contains("\"Host\":") {
-                        if let Some(socket_path) = stdout
-                            .lines()
-                            .find(|line| line.contains("\"Host\":"))
-                            .and_then(|line| line.split("unix://").nth(1))
-                            .map(|path| path.trim_matches(|c| c == '"' || c == ',' || c == ' '))
-                        {
-                            return socket_path.to_string();
-                        }
-                    }
-                }
-            }
-        }
-
-        // 如果都失败了，返回默认路径
-        "/var/run/docker.sock".to_string()
-    }
-
     pub async fn new() -> Result<Self> {
-        let socket_path = Self::get_docker_socket_path();
-        let docker = Docker::connect_with_socket(&socket_path, 120, API_DEFAULT_VERSION)?;
-        let restarter = Arc::new(ContainerRestarter::new().await?);
-        let monitor = Self { docker, restarter };
+        let docker = DockerClient::get().await?;
+        let restarter = Arc::new(ContainerRestarter::new(docker.clone()).await?);
+        let monitor = Self { docker: docker.clone(), restarter };
         
         monitor.init_containers().await?;
         
@@ -91,6 +57,13 @@ impl ContainerMonitor {
         Ok(())
     }
 
+    async fn ensure_docker_connection(&self) -> Result<()> {
+        if !DockerClient::check_health(&self.docker).await {
+            return Err(anyhow::anyhow!("Docker连接已断开"));
+        }
+        Ok(())
+    }
+
     pub async fn start_monitoring(&self) -> Result<()> {
         let mut events = self.docker.events(None::<EventsOptions<String>>);
         let mut restart_records: HashMap<String, RestartRecord> = HashMap::new();
@@ -101,6 +74,13 @@ impl ContainerMonitor {
         self.check_stopped_containers().await?;
 
         while let Some(event) = events.next().await {
+            // 定期检查 Docker 连接状态
+            if let Err(e) = self.ensure_docker_connection().await {
+                eprintln!("Docker连接检查失败: {}", e);
+                // 可以在这里添加重连逻辑或其他处理
+                continue;
+            }
+
             match event {
                 Ok(event) => {
                     if event.typ == Some(EventMessageTypeEnum::CONTAINER) {

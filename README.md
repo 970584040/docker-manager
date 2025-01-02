@@ -57,23 +57,6 @@
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-2. **安装目标平台支持**
-```bash
-# Linux 平台
-rustup target add x86_64-unknown-linux-gnu    # Linux 64位
-rustup target add aarch64-unknown-linux-gnu   # Linux ARM64
-rustup target add i686-unknown-linux-gnu      # Linux 32位
-
-# Windows 平台
-rustup target add x86_64-pc-windows-gnu       # Windows 64位
-rustup target add i686-pc-windows-gnu         # Windows 32位
-rustup target add aarch64-pc-windows-msvc     # Windows ARM64
-
-# macOS 平台
-rustup target add x86_64-apple-darwin         # macOS Intel
-rustup target add aarch64-apple-darwin        # macOS ARM
-```
-
 ### 安装交叉编译工具链
 
 #### macOS 上安装
@@ -81,12 +64,35 @@ rustup target add aarch64-apple-darwin        # macOS ARM
 # 安装 Homebrew（如果未安装）
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# 安装交叉编译工具
-brew install mingw-w64                        # Windows 交叉编译支持
-brew install FiloSottile/musl-cross/musl-cross
-brew install aarch64-linux-gnu-binutils       # Linux ARM64 支持
-brew install x86_64-linux-gnu-binutils       # Linux x86_64 支持
-brew install i686-linux-gnu-binutils         # Linux 32位支持
+# 添加工具链源
+brew tap messense/macos-cross-toolchains
+
+# Linux 平台工具链
+brew install x86_64-unknown-linux-gnu    # Linux x86_64
+brew install aarch64-unknown-linux-gnu   # Linux ARM64
+brew install i686-unknown-linux-gnu      # Linux 32位
+
+# Windows 平台工具链
+brew install mingw-w64                   # Windows x86_64/i686
+
+# macOS 平台工具链（虽然是原生支持，但安装一些有用的工具）
+brew install llvm                        # LLVM 工具链
+brew install cmake                       # CMake 构建工具
+brew install cargo-binutils             # Rust 二进制工具
+
+# 安装目标平台支持
+rustup target add x86_64-unknown-linux-gnu    # Linux 64位
+rustup target add aarch64-unknown-linux-gnu   # Linux ARM64
+rustup target add i686-unknown-linux-gnu      # Linux 32位
+
+rustup target add x86_64-pc-windows-gnu       # Windows 64位
+rustup target add i686-pc-windows-gnu         # Windows 32位
+rustup target add aarch64-pc-windows-msvc     # Windows ARM64 (需要在 Windows 上编译)
+
+rustup target add x86_64-apple-darwin         # macOS Intel
+rustup target add aarch64-apple-darwin        # macOS ARM
+
+注意：Windows ARM64 (aarch64-pc-windows-msvc) 需要在 Windows 系统上使用 MSVC 工具链编译
 ```
 
 #### Linux (Ubuntu/Debian) 上安装

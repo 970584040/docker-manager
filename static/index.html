@@ -9,95 +9,517 @@
             margin: 20px; 
             background-color: #f5f5f5;
         }
-        .container { 
-            border: 1px solid #ddd; 
-            padding: 15px; 
-            margin: 10px 0; 
-            border-radius: 8px;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .create-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .create-btn:hover {
+            background-color: #27ae60;
+        }
+        .container-table {
+            width: 100%;
+            border-collapse: collapse;
             background-color: white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
         }
-        .container-header { 
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-bottom: 10px;
+        .container-table th,
+        .container-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .container-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
             color: #333;
         }
-        .detail { 
-            margin: 5px 0 5px 20px; 
-            color: #666;
-            line-height: 1.4;
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 20px;
+        .container-table tr:hover {
+            background-color: #f8f9fa;
         }
         .status {
             display: inline-block;
             padding: 3px 8px;
             border-radius: 4px;
             font-size: 0.9em;
-            margin-left: 10px;
         }
-        .status.running {
-            background-color: #27ae60;
-            color: white;
+        .status.running { background-color: #27ae60; color: white; }
+        .status.exited { background-color: #e74c3c; color: white; }
+        .status.created { background-color: #f1c40f; color: black; }
+        .status.paused { background-color: #3498db; color: white; }
+        .status.unknown { background-color: #95a5a6; color: white; }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 12px;
         }
-        .status.exited {
+        .delete-btn {
             background-color: #e74c3c;
             color: white;
         }
-        .status.created {
-            background-color: #f1c40f;
-            color: black;
+        .delete-btn:hover {
+            background-color: #c0392b;
         }
-        .status.paused {
-            background-color: #3498db;
-            color: white;
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
         }
-        .status.unknown {
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 60%;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button-group {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .button-group button {
+            margin-left: 10px;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button-group button.cancel {
             background-color: #95a5a6;
             color: white;
+        }
+        .button-group button.submit {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        /* 添加容器详情模态框样式 */
+        .container-name {
+            cursor: pointer;
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        
+        .container-name:hover {
+            color: #3498db;
+        }
+        
+        .detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .detail-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-close {
+            cursor: pointer;
+            font-size: 24px;
+            color: #666;
+        }
+        
+        .detail-close:hover {
+            color: #333;
+        }
+        
+        .detail-section {
+            margin-bottom: 15px;
+        }
+        
+        .detail-section h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        
+        .detail-item {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        
+        .detail-label {
+            width: 120px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .detail-value {
+            flex: 1;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
-    <h1>Docker 容器监控</h1>
-    <div id="containers"></div>
+    <div class="header">
+        <h1>Docker 容器监控</h1>
+        <button class="create-btn" onclick="showCreateModal()">新建容器</button>
+    </div>
+    
+    <table class="container-table">
+        <thead>
+            <tr>
+                <th>状态</th>
+                <th>容器名称</th>
+                <th>镜像</th>
+                <th>IP地址</th>
+                <th>端口映射</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="containers">
+        </tbody>
+    </table>
+
+    <!-- 容器详情模态框 -->
+    <div id="detailModal" class="detail-modal">
+        <div class="detail-content">
+            <div class="detail-header">
+                <h2>容器详情</h2>
+                <span class="detail-close" onclick="hideDetailModal()">&times;</span>
+            </div>
+            <div id="containerDetail"></div>
+        </div>
+    </div>
+
+    <!-- 创建容器的模态框 -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <h2>创建新容器</h2>
+            <form id="createContainerForm" onsubmit="createContainer(event)">
+                <div class="form-group">
+                    <label>容器名称：</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>镜像名称：</label>
+                    <input type="text" name="image" required>
+                </div>
+                <div class="form-group">
+                    <label>端口映射：</label>
+                    <div class="port-mappings">
+                        <input type="text" name="port" placeholder="主机端口:容器端口">
+                        <button type="button" onclick="addPortMapping()">添加</button>
+                    </div>
+                    <div id="portList"></div>
+                </div>
+                <div class="form-group">
+                    <label>挂载点：</label>
+                    <div class="mount-points">
+                        <input type="text" name="mount" placeholder="主机路径:容器路径">
+                        <button type="button" onclick="addMount()">添加</button>
+                    </div>
+                    <div id="mountList"></div>
+                </div>
+                <div class="form-group">
+                    <label>环境变量：</label>
+                    <div class="env-vars">
+                        <input type="text" name="env" placeholder="KEY=VALUE">
+                        <button type="button" onclick="addEnv()">添加</button>
+                    </div>
+                    <div id="envList"></div>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="cancel" onclick="hideCreateModal()">取消</button>
+                    <button type="submit" class="submit">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
+        let ports = [];
+        let mounts = [];
+        let envVars = [];
+
+        function showCreateModal() {
+            document.getElementById('createModal').style.display = 'block';
+        }
+
+        function hideCreateModal() {
+            document.getElementById('createModal').style.display = 'none';
+            document.getElementById('createContainerForm').reset();
+            ports = [];
+            mounts = [];
+            envVars = [];
+            updateLists();
+        }
+
+        function addPortMapping() {
+            const portInput = document.querySelector('input[name="port"]');
+            if (portInput.value) {
+                ports.push(portInput.value);
+                portInput.value = '';
+                updateLists();
+            }
+        }
+
+        function addMount() {
+            const mountInput = document.querySelector('input[name="mount"]');
+            if (mountInput.value) {
+                mounts.push(mountInput.value);
+                mountInput.value = '';
+                updateLists();
+            }
+        }
+
+        function addEnv() {
+            const envInput = document.querySelector('input[name="env"]');
+            if (envInput.value) {
+                envVars.push(envInput.value);
+                envInput.value = '';
+                updateLists();
+            }
+        }
+
+        function updateLists() {
+            document.getElementById('portList').innerHTML = ports.map(p => 
+                `<div>${p} <button onclick="removePort('${p}')">删除</button></div>`
+            ).join('');
+            document.getElementById('mountList').innerHTML = mounts.map(m => 
+                `<div>${m} <button onclick="removeMount('${m}')">删除</button></div>`
+            ).join('');
+            document.getElementById('envList').innerHTML = envVars.map(e => 
+                `<div>${e} <button onclick="removeEnv('${e}')">删除</button></div>`
+            ).join('');
+        }
+
+        function removePort(port) {
+            ports = ports.filter(p => p !== port);
+            updateLists();
+        }
+
+        function removeMount(mount) {
+            mounts = mounts.filter(m => m !== mount);
+            updateLists();
+        }
+
+        function removeEnv(env) {
+            envVars = envVars.filter(e => e !== env);
+            updateLists();
+        }
+
+        async function createContainer(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {
+                name: formData.get('name'),
+                image: formData.get('image'),
+                ports: ports,
+                mounts: mounts,
+                env: envVars
+            };
+
+            try {
+                const response = await fetch('/api/containers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    hideCreateModal();
+                    loadContainers();
+                } else {
+                    alert('创建容器失败');
+                }
+            } catch (error) {
+                console.error('创建容器时出错:', error);
+                alert('创建容器失败');
+            }
+        }
+
         async function loadContainers() {
             try {
                 const response = await fetch('/api/containers');
                 const containers = await response.json();
                 
-                const containersDiv = document.getElementById('containers');
-                containersDiv.innerHTML = '';
+                const containersBody = document.getElementById('containers');
+                containersBody.innerHTML = '';
                 
                 containers.forEach(container => {
-                    const div = document.createElement('div');
-                    div.className = 'container';
-                    const statusClass = container.status.toLowerCase();
-                    div.innerHTML = `
-                        <div class="container-header">
-                            ${container.name}
-                            <span class="status ${statusClass}">${container.status}</span>
-                        </div>
-                        <div class="detail">ID: ${container.id}</div>
-                        <div class="detail">镜像: ${container.image}</div>
-                        <div class="detail">端口映射:</div>
-                        <div class="detail">
-                            ${container.ports.length ? container.ports.map(p => `- ${p}`).join('<br>') : '无'}
-                        </div>
-                        <div class="detail">挂载点:</div>
-                        <div class="detail">
-                            ${container.mounts.length ? container.mounts.map(m => `- ${m}`).join('<br>') : '无'}
-                        </div>
+                    const row = document.createElement('tr');
+                    
+                    // 格式化端口映射
+                    const ports = container.ports.map(p => `${p}`).join('<br>');
+                    
+                    // 获取容器IP
+                    const ip = container.ip_address || '未分配';
+                    
+                    row.innerHTML = `
+                        <td><span class="status ${container.status.toLowerCase()}">${container.status}</span></td>
+                        <td><span class="container-name" onclick="showContainerDetail('${container.id}')">${container.name}</span></td>
+                        <td>${container.image}</td>
+                        <td>${ip}</td>
+                        <td>${ports}</td>
+                        <td>
+                            <button class="action-btn delete-btn" onclick="deleteContainer('${container.id}')">删除</button>
+                        </td>
                     `;
-                    containersDiv.appendChild(div);
+                    
+                    containersBody.appendChild(row);
                 });
             } catch (error) {
                 console.error('加载容器信息失败:', error);
+            }
+        }
+
+        async function deleteContainer(id) {
+            if (!confirm('确定要删除这个容器吗？')) return;
+            
+            try {
+                const response = await fetch(`/api/container/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    loadContainers();
+                } else {
+                    alert('删除容器失败');
+                }
+            } catch (error) {
+                console.error('删除容器时出错:', error);
+                alert('删除容器失败');
+            }
+        }
+
+        async function showContainerDetail(containerId) {
+            try {
+                const response = await fetch(`/api/container/${containerId}`);
+                const container = await response.json();
+                
+                const detailHtml = `
+                    <div class="detail-section">
+                        <h3>基本信息</h3>
+                        <div class="detail-item">
+                            <span class="detail-label">容器ID：</span>
+                            <span class="detail-value">${container.id}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">名称：</span>
+                            <span class="detail-value">${container.name}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">镜像：</span>
+                            <span class="detail-value">${container.image}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">状态：</span>
+                            <span class="detail-value">${container.status}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">IP地址：</span>
+                            <span class="detail-value">${container.ip_address || '未分配'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>端口映射</h3>
+                        <div class="detail-value">
+                            ${container.ports.length > 0 ? 
+                                container.ports.map(port => `<div>${port}</div>`).join('') : 
+                                '无'}
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>环境变量</h3>
+                        <div class="detail-value">
+                            ${container.env.length > 0 ? 
+                                container.env.map(env => `<div>${env}</div>`).join('') : 
+                                '无'}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>数据卷</h3>
+                        <div class="detail-value">
+                            ${container.mounts.length > 0 ? 
+                                container.mounts.map(mount => `<div>${mount}</div>`).join('') : 
+                                '无'}
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('containerDetail').innerHTML = detailHtml;
+                document.getElementById('detailModal').style.display = 'block';
+            } catch (error) {
+                console.error('加载容器详情失败:', error);
+            }
+        }
+
+        function hideDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const detailModal = document.getElementById('detailModal');
+            const createModal = document.getElementById('createModal');
+            if (event.target === detailModal) {
+                detailModal.style.display = 'none';
+            }
+            if (event.target === createModal) {
+                hideCreateModal();
             }
         }
 

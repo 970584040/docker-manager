@@ -6,6 +6,7 @@ mod web;
 use anyhow::Result;
 use std::sync::Arc;
 use monitor::ContainerMonitor;
+use docker_manager::models;
 
 #[tokio::main]
 async fn main() -> Result<()> {

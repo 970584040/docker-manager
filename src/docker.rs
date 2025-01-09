@@ -4,7 +4,6 @@ use std::path::Path;
 use std::process::Command;
 use anyhow::Result;
 use lazy_static::lazy_static;
-use std::sync::Arc;
 use tokio::sync::OnceCell;
 use tokio::time::{Duration, sleep};
 
